@@ -7,10 +7,14 @@ import Canvas from '../components/Canvas/Canvas'
 import Result from '../components/Result/Result'
 
 function App() {
+  const setResult = (image) => {
+    console.log(image)
+  }
+
   return (
     <div className="app-wrapper">
       <div className="app-content">
-        <Canvas />
+        <Canvas setResult={setResult} />
         <Result />
       </div>
       <BottomNav />

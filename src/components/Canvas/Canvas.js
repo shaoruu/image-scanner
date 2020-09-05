@@ -13,7 +13,7 @@ import './Canvas.scss'
 
 const MAX_POINTS = 4
 
-export default () => {
+export default ({ setResult }) => {
   const mount = useRef(null)
   const inputRef = useRef(null)
   const scannerRef = useRef(new ImageScanner())
@@ -130,6 +130,7 @@ export default () => {
           disabled={points.length !== MAX_POINTS}
           height={40}
           iconAfter={PrintIcon}
+          onClick={() => setResult(scannerRef.current.project())}
         >
           Flatten
         </Button>
