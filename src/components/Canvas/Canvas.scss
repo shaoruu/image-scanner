@@ -1,0 +1,25 @@
+.canvas-wrapper {
+  width: 50vw;
+  height: 100%;
+  position: relative;
+}
+
+.canvas-main {
+  background: #f9f7f7;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 90%;
+  cursor: pointer;
+}
+
+.canvas-toolbox {
+  width: 100%;
+  height: 10%;
+  background: #dbe2ef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
