@@ -1,18 +1,10 @@
 import p5 from 'p5'
-import { inv } from 'mathjs'
-import { Matrix } from 'gauss-jordan'
+import PerspT from 'perspective-transform'
 
 const POINT_DIAMETER = 10
 
-const TARGET_POINTS = [
-  { x: 0, y: 0 },
-  { x: 0, y: 500 },
-  { x: 500, y: 0 },
-  { x: 500, y: 500 }
-]
-
 export default class ImageScanner {
-  setup = (container, image, addPoint) => {
+  setup = (container, image) => {
     this.terminate()
 
     this.container = container
@@ -20,6 +12,8 @@ export default class ImageScanner {
     this.x = container.offsetWidth / 2
     this.y = container.offsetHeight / 2
     this.scale = 1
+
+    this.mousePressed = false
 
     this.sketch = (p) => {
       if (!image) return
@@ -61,6 +55,13 @@ export default class ImageScanner {
       }
 
       p.mousePressed = () => {
+        if (
+          p.mouseX < 0 ||
+          p.mouseX > p.width ||
+          p.mouseY < 0 ||
+          p.mouseY > p.height
+        )
+          return
         const x = (p.mouseX - this.x) / this.scale + this.background.width / 2
         const y = (p.mouseY - this.y) / this.scale + this.background.height / 2
 
@@ -86,12 +87,23 @@ export default class ImageScanner {
 
         this.startX = p.mouseX
         this.startY = p.mouseY
+
+        this.mousePressed = true
+      }
+
+      p.mouseReleased = () => {
+        this.mousePressed = false
       }
 
       p.mouseDragged = () => {
-        if (this.isPinning) return
-        if (p.mouseX > p.width || p.mouseY > p.height) return
-
+        if (this.isPinning || !this.mousePressed) return
+        if (
+          p.mouseX < 0 ||
+          p.mouseX > p.width ||
+          p.mouseY < 0 ||
+          p.mouseY > p.height
+        )
+          return
         const diffX = this.startX - p.mouseX
         const diffY = this.startY - p.mouseY
 
@@ -104,8 +116,13 @@ export default class ImageScanner {
 
       p.mouseWheel = (e) => {
         if (this.isPinning) return
-        if (p.mouseX > p.width || p.mouseY > p.height) return
-
+        if (
+          p.mouseX < 0 ||
+          p.mouseX > p.width ||
+          p.mouseY < 0 ||
+          p.mouseY > p.height
+        )
+          return
         const { delta } = e
         this.scale += delta / 1000
       }
@@ -132,59 +149,69 @@ export default class ImageScanner {
   setPoints = (points) => (this.points = points)
 
   project = () => {
-    const sortedPoints = this.points.sort(function (a, b) {
-      if (a.y === b.y) return a.x - b.x
-      return a.y - b.y
-    })
+    // const sortedPoints = this.points.sort(function (a, b) {
+    //   if (a.y === b.y) return a.x - b.x
+    //   return a.y - b.y
+    // })
+    const topLeft = this.points
+      .map((p) => ({
+        d: Math.sqrt(p.x ** 2 + p.y ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const topRight = this.points
+      .map((p) => ({
+        d: Math.sqrt((p.x - this.background.width) ** 2 + p.y ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const bottomLeft = this.points
+      .map((p) => ({
+        d: Math.sqrt(p.x ** 2 + (p.y - this.background.height) ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const bottomRight = this.points
+      .map((p) => ({
+        d: Math.sqrt(
+          (p.x - this.background.width) ** 2 +
+            (p.y - this.background.height) ** 2
+        ),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
 
-    const a1 = []
-    const a2 = []
-    const b1 = []
-    const b2 = []
+    const srcCorners = [
+      topLeft.x,
+      topLeft.y,
+      topRight.x,
+      topRight.y,
+      bottomRight.x,
+      bottomRight.y,
+      bottomLeft.x,
+      bottomLeft.y
+    ]
+    const dstCorners = [0, 0, 500, 0, 500, 500, 0, 500]
 
-    for (let i = 0; i < sortedPoints.length; i++) {
-      const s = sortedPoints[i]
-      const t = TARGET_POINTS[i]
+    const perspT = PerspT(srcCorners, dstCorners)
 
-      a1.push([s.x, s.y, 1, 0, 0, 0, -s.x * t.x, -s.y * t.x])
-      a2.push([0, 0, 0, s.x, s.y, 1, -s.x * t.y, -s.y * t.y])
+    this.background.loadPixels()
+    const img = this.p5instance.createImage(500, 500)
+    img.loadPixels()
 
-      b1.push(t.x)
-      b2.push(t.y)
+    for (let i = 0; i < img.width; i++) {
+      for (let j = 0; j < img.height; j++) {
+        const srcP = perspT.transformInverse(i, j)
+        const color = this.background.get(srcP[0], srcP[1])
+        img.set(i, j, color)
+      }
     }
 
-    const aA = a1.concat(a2)
-    const bA = b1.concat(b2)
+    img.updatePixels()
 
-    const inverseA = inv(aA)
-    const invAMatrix = Matrix.fromRationalArray(inverseA)
-    const bMatrix = Matrix.fromRationalArray(bA.map((n) => [n]))
+    console.log(img)
 
-    const values = invAMatrix.multiply(bMatrix).values.flat()
-
-    const [a, b, c, d, e, f, g, h] = values
-    const i = 1
-
-    const transformMatrix = Matrix.fromRationalArray([
-      [e * i - f * h, c * h - b * i, b * f - c * e],
-      [f * g - d * i, a * i - c * g, c * d - a * f],
-      [d * h - e * g, b * g - a * h, a * e - b * d]
-    ])
-
-    // for (let i = 0; i < result.width; i++) {
-    //   for (let j = 0; j < result.height; j++) {
-    //     result.set(i, j, )
-    //   }
-    // }
-
-    // const { x, y } = sortedPoints[0]
-    const x = 0
-    const y = 0
-    console.log(sortedPoints[0])
-    console.log(x, y)
-    const tempMat = Matrix.fromRationalArray([[x], [y], [1]])
-    console.log(transformMatrix.values)
-    console.log(transformMatrix.multiply(tempMat).values)
+    return img
   }
 
   terminate = () => {

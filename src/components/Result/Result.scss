@@ -3,4 +3,12 @@
   height: 100%;
   position: relative;
   background: #3f72af;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.result-main {
+  width: 50vw;
+  height: 100%;
 }

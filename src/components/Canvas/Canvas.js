@@ -13,11 +13,10 @@ import './Canvas.scss'
 
 const MAX_POINTS = 4
 
-export default ({ setResult }) => {
+export default ({ image, setImage, setResult }) => {
   const mount = useRef(null)
   const inputRef = useRef(null)
   const scannerRef = useRef(new ImageScanner())
-  const [image, setImage] = useState('')
   const [isPinning, setIsPinning] = useState(false)
   const [points, setPoints] = useState([])
 

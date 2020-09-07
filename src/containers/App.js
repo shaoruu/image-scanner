@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import './App.scss'
 
@@ -7,15 +7,14 @@ import Canvas from '../components/Canvas/Canvas'
 import Result from '../components/Result/Result'
 
 function App() {
-  const setResult = (image) => {
-    console.log(image)
-  }
+  const [image, setImage] = useState('')
+  const [result, setResult] = useState(null)
 
   return (
     <div className="app-wrapper">
       <div className="app-content">
-        <Canvas setResult={setResult} />
-        <Result />
+        <Canvas image={image} setImage={setImage} setResult={setResult} />
+        <Result result={result} />
       </div>
       <BottomNav />
     </div>
