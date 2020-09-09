@@ -1,3 +1,4 @@
+import { Button, DownloadIcon } from 'evergreen-ui'
 import React, { useEffect, useRef } from 'react'
 
 import Result from '../../core/Result'
@@ -15,6 +16,21 @@ export default ({ result }) => {
   return (
     <div className="result-wrapper">
       <div className="result-main" ref={mount} />
+      <div className="result-toolbox">
+        <Button
+          iconAfter={DownloadIcon}
+          appearance="primary"
+          intent="warning"
+          marginRight={8}
+          disabled={!result}
+          height={40}
+          onClick={() => {
+            result.save('result', 'png')
+          }}
+        >
+          Download
+        </Button>
+      </div>
     </div>
   )
 }

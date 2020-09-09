@@ -41,17 +41,36 @@ export default class ImageScanner {
         p.clear()
         p.image(this.background, this.x, this.y, imgWidth, imgHeight)
 
-        this.points.forEach(({ x, y }) => {
+        this.points.forEach((point) => {
+          const { x: mx, y: my } = this.mapPointToCanvas(point)
+
           p.noStroke()
           p.fill('#e84a5f')
           p.rectMode(p.CENTER)
-          p.rect(
-            this.x + x * this.scale - imgWidth / 2,
-            this.y + y * this.scale - imgHeight / 2,
-            POINT_DIAMETER * this.scale,
-            POINT_DIAMETER * this.scale
-          )
+          p.rect(mx, my, POINT_DIAMETER, POINT_DIAMETER)
         })
+
+        // TODO: extract 4
+        if (this.points.length === 4) {
+          const {
+            topLeft,
+            topRight,
+            bottomLeft,
+            bottomRight
+          } = this.getCornerPoints()
+
+          const p1 = this.mapPointToCanvas(topLeft)
+          const p2 = this.mapPointToCanvas(topRight)
+          const p3 = this.mapPointToCanvas(bottomLeft)
+          const p4 = this.mapPointToCanvas(bottomRight)
+
+          p.stroke('#e84a5f99')
+          p.strokeWeight(8)
+          this.drawLine(p, p1, p3)
+          this.drawLine(p, p2, p4)
+          this.drawLine(p, p1, p2)
+          this.drawLine(p, p3, p4)
+        }
       }
 
       p.mousePressed = () => {
@@ -67,10 +86,10 @@ export default class ImageScanner {
 
         const pointIndex = this.points.findIndex(
           ({ x: px, y: py }) =>
-            x >= px - (POINT_DIAMETER * this.scale) / 2 &&
-            x <= px + (POINT_DIAMETER * this.scale) / 2 &&
-            y >= py - (POINT_DIAMETER * this.scale) / 2 &&
-            y <= py + (POINT_DIAMETER * this.scale) / 2
+            x >= px - POINT_DIAMETER / 2 &&
+            x <= px + POINT_DIAMETER / 2 &&
+            y >= py - POINT_DIAMETER / 2 &&
+            y <= py + POINT_DIAMETER / 2
         )
         if (p.mouseButton === p.RIGHT && pointIndex !== -1) {
           this.reactRemovePoint(pointIndex)
@@ -148,6 +167,38 @@ export default class ImageScanner {
 
   setPoints = (points) => (this.points = points)
 
+  getCornerPoints = () => {
+    const topLeft = this.points
+      .map((p) => ({
+        d: Math.sqrt(p.x ** 2 + p.y ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const topRight = this.points
+      .map((p) => ({
+        d: Math.sqrt((p.x - this.background.width) ** 2 + p.y ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const bottomLeft = this.points
+      .map((p) => ({
+        d: Math.sqrt(p.x ** 2 + (p.y - this.background.height) ** 2),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+    const bottomRight = this.points
+      .map((p) => ({
+        d: Math.sqrt(
+          (p.x - this.background.width) ** 2 +
+            (p.y - this.background.height) ** 2
+        ),
+        p
+      }))
+      .sort((a, b) => a.d - b.d)[0].p
+
+    return { topLeft, topRight, bottomRight, bottomLeft }
+  }
+
   project = async () => {
     // const sortedPoints = this.points.sort(function (a, b) {
     //   if (a.y === b.y) return a.x - b.x
@@ -159,11 +210,7 @@ export default class ImageScanner {
       const matrixWorker = new MatrixWorker()
 
       matrixWorker.postMessage({
-        points: this.points,
-        background: {
-          width: this.background.width,
-          height: this.background.height
-        }
+        points: this.getCornerPoints()
       })
 
       matrixWorker.onmessage = (e) => {
@@ -210,9 +257,21 @@ export default class ImageScanner {
     return coordinates
   }
 
+  drawLine = (p, p1, p2) => {
+    p.line(p1.x, p1.y, p2.x, p2.y)
+  }
+
+  mapPointToCanvas = (p) => {
+    return {
+      x: this.x + p.x * this.scale - (this.background.width * this.scale) / 2,
+      y: this.y + p.y * this.scale - (this.background.height * this.scale) / 2
+    }
+  }
+
   terminate = () => {
     if (this.p5instance) {
       this.p5instance.remove()
+      this.p5instance = null
     }
   }
 

@@ -1,14 +1,23 @@
 .result-wrapper {
   width: 50vw;
   height: 100%;
+}
+
+.result-main {
   position: relative;
   background: #3f72af;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 50vw;
+  height: 90%;
 }
 
-.result-main {
-  width: 50vw;
-  height: 100%;
+.result-toolbox {
+  width: 100%;
+  height: 10%;
+  background: #2b63a8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
