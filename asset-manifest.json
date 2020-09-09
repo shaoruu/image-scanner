@@ -1,24 +1,24 @@
 {
   "files": {
-    "main.css": "/image-scanner/static/css/main.5123df8a.chunk.css",
-    "main.js": "/image-scanner/static/js/main.1c1fca82.chunk.js",
-    "main.js.map": "/image-scanner/static/js/main.1c1fca82.chunk.js.map",
+    "main.css": "/image-scanner/static/css/main.77e222a1.chunk.css",
+    "main.js": "/image-scanner/static/js/main.42ad3afd.chunk.js",
+    "main.js.map": "/image-scanner/static/js/main.42ad3afd.chunk.js.map",
     "runtime-main.js": "/image-scanner/static/js/runtime-main.9745b41a.js",
     "runtime-main.js.map": "/image-scanner/static/js/runtime-main.9745b41a.js.map",
-    "static/js/2.7d43968c.chunk.js": "/image-scanner/static/js/2.7d43968c.chunk.js",
-    "static/js/2.7d43968c.chunk.js.map": "/image-scanner/static/js/2.7d43968c.chunk.js.map",
+    "static/js/2.5d8a5157.chunk.js": "/image-scanner/static/js/2.5d8a5157.chunk.js",
+    "static/js/2.5d8a5157.chunk.js.map": "/image-scanner/static/js/2.5d8a5157.chunk.js.map",
     "index.html": "/image-scanner/index.html",
-    "precache-manifest.617da77f95136e7254394461f47ea770.js": "/image-scanner/precache-manifest.617da77f95136e7254394461f47ea770.js",
+    "precache-manifest.1a727d63feb20fc45a9b1a0c25cb4bc2.js": "/image-scanner/precache-manifest.1a727d63feb20fc45a9b1a0c25cb4bc2.js",
     "service-worker.js": "/image-scanner/service-worker.js",
-    "static/css/main.5123df8a.chunk.css.map": "/image-scanner/static/css/main.5123df8a.chunk.css.map",
-    "static/js/2.7d43968c.chunk.js.LICENSE.txt": "/image-scanner/static/js/2.7d43968c.chunk.js.LICENSE.txt",
-    "static/js/Matrix.worker.80242c70.worker.js": "/image-scanner/static/js/Matrix.worker.80242c70.worker.js",
-    "static/js/Matrix.worker.80242c70.worker.js.map": "/image-scanner/static/js/Matrix.worker.80242c70.worker.js.map"
+    "static/css/main.77e222a1.chunk.css.map": "/image-scanner/static/css/main.77e222a1.chunk.css.map",
+    "static/js/2.5d8a5157.chunk.js.LICENSE.txt": "/image-scanner/static/js/2.5d8a5157.chunk.js.LICENSE.txt",
+    "static/js/Matrix.worker.d843d03d.worker.js": "/image-scanner/static/js/Matrix.worker.d843d03d.worker.js",
+    "static/js/Matrix.worker.d843d03d.worker.js.map": "/image-scanner/static/js/Matrix.worker.d843d03d.worker.js.map"
   },
   "entrypoints": [
     "static/js/runtime-main.9745b41a.js",
-    "static/js/2.7d43968c.chunk.js",
-    "static/css/main.5123df8a.chunk.css",
-    "static/js/main.1c1fca82.chunk.js"
+    "static/js/2.5d8a5157.chunk.js",
+    "static/css/main.77e222a1.chunk.css",
+    "static/js/main.42ad3afd.chunk.js"
   ]
 }
