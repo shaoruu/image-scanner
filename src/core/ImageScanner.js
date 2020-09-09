@@ -41,6 +41,7 @@ export default class ImageScanner {
         p.clear()
         p.image(this.background, this.x, this.y, imgWidth, imgHeight)
 
+        p.push()
         this.points.forEach((point) => {
           const { x: mx, y: my } = this.mapPointToCanvas(point)
 
@@ -49,8 +50,10 @@ export default class ImageScanner {
           p.rectMode(p.CENTER)
           p.rect(mx, my, POINT_DIAMETER, POINT_DIAMETER)
         })
+        p.pop()
 
         // TODO: extract 4
+        p.push()
         if (this.points.length === 4) {
           const {
             topLeft,
@@ -71,6 +74,33 @@ export default class ImageScanner {
           this.drawLine(p, p1, p2)
           this.drawLine(p, p3, p4)
         }
+        p.pop()
+
+        p.push()
+        p.text(
+          `x: ${Math.floor(p.mouseX)}, y: ${Math.floor(p.mouseY)}`,
+          10,
+          p.height - 10
+        )
+        if (
+          p.mouseX >= this.x - imgWidth / 2 &&
+          p.mouseX <= this.x + imgWidth / 2 &&
+          p.mouseY >= this.y - imgHeight / 2 &&
+          p.mouseY <= this.y + imgHeight / 2
+        ) {
+          const mx =
+            (p.mouseX - this.x + (this.background.width * this.scale) / 2) /
+            this.scale
+          const my =
+            (p.mouseY - this.y + (this.background.height * this.scale) / 2) /
+            this.scale
+          p.text(
+            `img x: ${Math.floor(mx)}, img y: ${Math.floor(my)}`,
+            10,
+            p.height - 30
+          )
+        }
+        p.pop()
       }
 
       p.mousePressed = () => {
