@@ -129,7 +129,7 @@ export default ({ image, setImage, setResult }) => {
           disabled={points.length !== MAX_POINTS}
           height={40}
           iconAfter={PrintIcon}
-          onClick={() => setResult(scannerRef.current.project())}
+          onClick={async () => setResult(await scannerRef.current.project())}
         >
           Flatten
         </Button>

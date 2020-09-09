@@ -1,5 +1,5 @@
 import p5 from 'p5'
-import PerspT from 'perspective-transform'
+import MatrixWorker from './Matrix.worker'
 
 const POINT_DIAMETER = 10
 
@@ -148,70 +148,33 @@ export default class ImageScanner {
 
   setPoints = (points) => (this.points = points)
 
-  project = () => {
+  project = async () => {
     // const sortedPoints = this.points.sort(function (a, b) {
     //   if (a.y === b.y) return a.x - b.x
     //   return a.y - b.y
     // })
-    const topLeft = this.points
-      .map((p) => ({
-        d: Math.sqrt(p.x ** 2 + p.y ** 2),
-        p
-      }))
-      .sort((a, b) => a.d - b.d)[0].p
-    const topRight = this.points
-      .map((p) => ({
-        d: Math.sqrt((p.x - this.background.width) ** 2 + p.y ** 2),
-        p
-      }))
-      .sort((a, b) => a.d - b.d)[0].p
-    const bottomLeft = this.points
-      .map((p) => ({
-        d: Math.sqrt(p.x ** 2 + (p.y - this.background.height) ** 2),
-        p
-      }))
-      .sort((a, b) => a.d - b.d)[0].p
-    const bottomRight = this.points
-      .map((p) => ({
-        d: Math.sqrt(
-          (p.x - this.background.width) ** 2 +
-            (p.y - this.background.height) ** 2
-        ),
-        p
-      }))
-      .sort((a, b) => a.d - b.d)[0].p
+    let matrix, width, height
 
-    const width =
-      (Math.sqrt(
-        (topLeft.x - topRight.x) ** 2 + (topLeft.y - topRight.y) ** 2
-      ) +
-        Math.sqrt(
-          (bottomRight.x - bottomLeft.x) ** 2 +
-            (bottomRight.y - bottomLeft.y) ** 2
-        )) /
-      2
-    const height =
-      (Math.sqrt(
-        (topLeft.x - bottomLeft.x) ** 2 + (topLeft.y - bottomLeft.y) ** 2
-      ) +
-        Math.sqrt(
-          (bottomRight.x - topRight.x) ** 2 + (bottomRight.y - topRight.y) ** 2
-        )) /
-      2
+    await new Promise((resolve) => {
+      const matrixWorker = new MatrixWorker()
 
-    const srcCorners = [
-      topLeft.x,
-      topLeft.y,
-      topRight.x,
-      topRight.y,
-      bottomRight.x,
-      bottomRight.y,
-      bottomLeft.x,
-      bottomLeft.y
-    ]
-    const dstCorners = [0, 0, width, 0, width, height, 0, height]
+      matrixWorker.postMessage({
+        points: this.points,
+        background: {
+          width: this.background.width,
+          height: this.background.height
+        }
+      })
 
-    const perspT = PerspT(srcCorners, dstCorners)
+      matrixWorker.onmessage = (e) => {
+        matrix = e.data.matrix
+        width = e.data.width
+        height = e.data.height
+        resolve()
+      }
+    })
+
+    const { coeffsInv } = matrix
 
     this.background.loadPixels()
     const img = this.p5instance.createImage(
@@ -222,8 +185,11 @@ export default class ImageScanner {
 
     for (let i = 0; i < img.width; i++) {
       for (let j = 0; j < img.height; j++) {
-        const srcP = perspT.transformInverse(i, j)
-        const color = this.background.get(srcP[0], srcP[1])
+        const srcP = this.transformInverse(i, j, coeffsInv)
+        const color = this.background.get(
+          Math.floor(srcP.x),
+          Math.floor(srcP.y)
+        )
         img.set(i, j, color)
       }
     }
@@ -231,6 +197,17 @@ export default class ImageScanner {
     img.updatePixels()
 
     return img
+  }
+
+  transformInverse = (x, y, coeffsInv) => {
+    var coordinates = {}
+    coordinates.x =
+      (coeffsInv[0] * x + coeffsInv[1] * y + coeffsInv[2]) /
+      (coeffsInv[6] * x + coeffsInv[7] * y + 1)
+    coordinates.y =
+      (coeffsInv[3] * x + coeffsInv[4] * y + coeffsInv[5]) /
+      (coeffsInv[6] * x + coeffsInv[7] * y + 1)
+    return coordinates
   }
 
   terminate = () => {
