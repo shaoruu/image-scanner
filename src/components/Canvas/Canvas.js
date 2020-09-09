@@ -98,13 +98,20 @@ export default ({ image, setImage, setResult }) => {
           hidden
           onChange={onImageInput}
         />
-        {!scannerRef.current.enabled && (
+        {!image && (
           <>
             <UploadIcon size={100} color="#dbe2ef77" />
             <Paragraph color="#959ba577" textAlign="center" marginTop={10}>
               Click to upload image
             </Paragraph>
           </>
+        )}
+        {image && (
+          <Paragraph className="canvas-hint">
+            Scroll to zoom in/out, drag to pan.
+            <br />
+            Press "Start Pinning" and pin 4 points. Right click to unpin.
+          </Paragraph>
         )}
       </div>
       <div className="canvas-toolbox">
@@ -118,9 +125,9 @@ export default ({ image, setImage, setResult }) => {
           onClick={() => setIsPinning(!isPinning)}
         >
           {isPinning && MAX_POINTS !== points.length ? (
-            <span>Pinning... ({MAX_POINTS - points.length})</span>
+            <span>Stop Pinning ({MAX_POINTS - points.length})</span>
           ) : (
-            <span>Pin Points ({MAX_POINTS - points.length})</span>
+            <span>Start Pinning ({MAX_POINTS - points.length})</span>
           )}
         </Button>
         <Button
