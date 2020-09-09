@@ -14,9 +14,6 @@ export default class Result {
     this.sketch = (p) => {
       if (!image) return
 
-      // p.preload = () => {
-      //   this.background = p.loadImage(image)
-      // }
       this.background = image
 
       p.setup = () => {

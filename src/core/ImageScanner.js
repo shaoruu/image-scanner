@@ -181,6 +181,24 @@ export default class ImageScanner {
       }))
       .sort((a, b) => a.d - b.d)[0].p
 
+    const width =
+      (Math.sqrt(
+        (topLeft.x - topRight.x) ** 2 + (topLeft.y - topRight.y) ** 2
+      ) +
+        Math.sqrt(
+          (bottomRight.x - bottomLeft.x) ** 2 +
+            (bottomRight.y - bottomLeft.y) ** 2
+        )) /
+      2
+    const height =
+      (Math.sqrt(
+        (topLeft.x - bottomLeft.x) ** 2 + (topLeft.y - bottomLeft.y) ** 2
+      ) +
+        Math.sqrt(
+          (bottomRight.x - topRight.x) ** 2 + (bottomRight.y - topRight.y) ** 2
+        )) /
+      2
+
     const srcCorners = [
       topLeft.x,
       topLeft.y,
@@ -191,12 +209,15 @@ export default class ImageScanner {
       bottomLeft.x,
       bottomLeft.y
     ]
-    const dstCorners = [0, 0, 500, 0, 500, 500, 0, 500]
+    const dstCorners = [0, 0, width, 0, width, height, 0, height]
 
     const perspT = PerspT(srcCorners, dstCorners)
 
     this.background.loadPixels()
-    const img = this.p5instance.createImage(500, 500)
+    const img = this.p5instance.createImage(
+      Math.floor(width),
+      Math.floor(height)
+    )
     img.loadPixels()
 
     for (let i = 0; i < img.width; i++) {
@@ -208,8 +229,6 @@ export default class ImageScanner {
     }
 
     img.updatePixels()
-
-    console.log(img)
 
     return img
   }
